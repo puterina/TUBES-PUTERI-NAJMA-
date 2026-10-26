@@ -21,19 +21,27 @@ class HousekeeperController extends Controller
     }
 
     public function index(Request $request)
-    {
-        $housekeepers = Housekeeper::query()
-            ->when($request->search, function ($q, $search) {
+{
+    $housekeepers = Housekeeper::query()
+        ->when($request->search, function ($q, $search) {
+            $q->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
                   ->orWhere('area_penanganan', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            });
+        })
+        ->when($request->shift, fn ($q, $shift) => $q->where('shift', $shift))
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('housekeepers.index', compact('housekeepers'));
-    }
+    $stats = [
+        'total'    => Housekeeper::count(),
+        'aktif'    => Housekeeper::where('status', 'aktif')->count(),
+        'nonaktif' => Housekeeper::where('status', 'nonaktif')->count(),
+    ];
 
+    return view('housekeepers.index', compact('housekeepers', 'stats'));
+}
     public function create()
     {
         return view('housekeepers.create');
@@ -50,7 +58,7 @@ class HousekeeperController extends Controller
     public function edit(Housekeeper $housekeeper)
     {
         return view('housekeepers.edit', compact('housekeeper'));
-    }
+    }   
 
     public function update(Request $request, Housekeeper $housekeeper)
     {

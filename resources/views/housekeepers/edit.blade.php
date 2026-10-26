@@ -9,7 +9,7 @@
     @method('PUT')
     @include('housekeepers._form')
     <div>
-        <button class="btn btn-primary">Perbarui</button>
+        <button class="btn btn-brand">Perbarui/button>
         <a href="{{ route('housekeepers.index') }}" class="btn btn-secondary">Batal</a>
     </div>
 </form>
